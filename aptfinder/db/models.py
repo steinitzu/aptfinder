@@ -13,7 +13,7 @@ class Apartment(BaseModel):
 
     id = Column(Integer, primary_key=True)
     date_listed = Column(DateTime)
-    url = Column(String)
+    url = Column(String, unique=True, nullable=False)
     address = Column(String)
     price = Column(Numeric)
     price_currency = Column(String, default='CAD')
