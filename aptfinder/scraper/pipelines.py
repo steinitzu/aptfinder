@@ -16,6 +16,9 @@ class AptscraperPipeline(object):
 
 
 class SQLAlchemyPipeline(object):
+    def open_spider(self, spider):
+        db.init_db()
+
     def process_item(self, item, spider):
         s = db.Session()
         a = Apartment(**item)
