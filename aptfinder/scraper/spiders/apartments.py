@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+from decimal import Decimal
 
 import scrapy
 from dateutil.parser import parse as dateparse
@@ -49,10 +50,15 @@ class ApartmentsSpider(scrapy.Spider):
             if heading == 'price':
                 data = data.css('[itemprop="price"]')
                 data = data.xpath('./strong/text()').extract_first()
+                data = data.replace(',', '')
+                data = Decimal(data[1:])
             else:
                 data = data.xpath('text()').extract_first()
-            data = data.strip()
-            if heading == 'date_listed':
+            if isinstance(data, str):
+                data = data.strip()
+            if isinstance(data, Decimal):
+                pass
+            elif heading == 'date_listed':
                 data = dateparse(data)
             elif heading == 'bathrooms':
                 data = int(data[0])

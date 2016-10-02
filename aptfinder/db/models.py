@@ -7,6 +7,10 @@ BaseModel = declarative_base()
 class Apartment(BaseModel):
     __tablename__ = 'apartment'
 
+    def __init__(self, **data):
+        for key, value in data.items():
+            setattr(self, key, value)
+
     id = Column(Integer, primary_key=True)
     date_listed = Column(DateTime)
     url = Column(String)
