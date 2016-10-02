@@ -44,6 +44,7 @@ class ApartmentsSpider(scrapy.Spider):
 
             heading = heading.strip().lower()
             heading = re.sub(r'[^\w\s]', '', heading)
+            heading = heading.strip()
             heading = heading.replace(' ', '_')
             if heading == 'price':
                 data = data.css('[itemprop="price"]')
