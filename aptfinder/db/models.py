@@ -5,7 +5,7 @@ BaseModel = declarative_base()
 
 
 class Apartment(BaseModel):
-    __tablename__ == 'apartment'
+    __tablename__ = 'apartment'
 
     id = Column(Integer, primary_key=True)
     date_listed = Column(DateTime)
