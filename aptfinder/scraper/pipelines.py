@@ -5,6 +5,8 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
+from math import radians
+
 import googlemaps
 
 from .. import db
@@ -25,8 +27,10 @@ class SQLAlchemyPipeline(object):
 
     def process_item(self, item, spider):
         loc = self.gmaps.geocode(item['address'])[0]
-        item['latitude'] = loc['geometry']['location']['lat']
-        item['longitude'] = loc['geometry']['location']['lng']
+        lat = radians(loc['geometry']['location']['lat'])
+        lng = radians(loc['geometry']['location']['lng'])
+        item['latitude'] = lat
+        item['longitude'] = lng
         s = db.Session()
         a = Apartment(**item)
         s.add(a)
