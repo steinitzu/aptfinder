@@ -1,5 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, Integer, DateTime, Numeric, Boolean
+from sqlalchemy import (Column, String, Integer,
+                        DateTime, Numeric, Boolean,
+                        Float)
 
 BaseModel = declarative_base()
 
@@ -20,3 +22,5 @@ class Apartment(BaseModel):
     pet_friendly = Column(Boolean)
     bathrooms = Column(Integer)
     furnished = Column(Boolean)
+    latitude = Column(Float)
+    longitude = Column(Float)

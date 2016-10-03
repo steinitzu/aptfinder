@@ -51,12 +51,15 @@ class ApartmentsSpider(scrapy.Spider):
                 data = data.css('[itemprop="price"]')
                 data = data.xpath('./strong/text()').extract_first()
                 data = data.replace(',', '')
-                data = Decimal(data[1:])
+                try:
+                    data = Decimal(data[1:])
+                except:
+                    data = None
             else:
                 data = data.xpath('text()').extract_first()
             if isinstance(data, str):
                 data = data.strip()
-            if isinstance(data, Decimal):
+            if isinstance(data, Decimal) or data is None:
                 pass
             elif heading == 'date_listed':
                 data = dateparse(data)
