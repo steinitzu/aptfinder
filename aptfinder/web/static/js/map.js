@@ -18,7 +18,21 @@ function update_listings(circle) {
     }).then(function(response) {
         response.json().then(function(result) {
             // TODO: Display results
-            console.log(result);
+            result.forEach(function(listing){
+                var p = new google.maps.LatLng(
+                    listing['latitude'] * (180/Math.PI),
+                    listing['longitude'] * (180/Math.PI));
+                var marker = new google.maps.Marker({
+                    position: p,
+                    title:listing['address']
+                });
+                marker.setMap(map);
+
+                // TODO: delete the old markers
+                console.log(marker);
+
+                console.log(listing);
+            });
         });
     });
 

@@ -26,11 +26,11 @@ class SQLAlchemyPipeline(object):
         db.init_db()
 
     def process_item(self, item, spider):
-        loc = self.gmaps.geocode(item['address'])[0]
-        lat = radians(loc['geometry']['location']['lat'])
-        lng = radians(loc['geometry']['location']['lng'])
-        item['latitude'] = lat
-        item['longitude'] = lng
+        # loc = self.gmaps.geocode(item['address'])[0]
+        # lat = radians(loc['geometry']['location']['lat'])
+        # lng = radians(loc['geometry']['location']['lng'])
+        # item['latitude'] = lat
+        # item['longitude'] = lng
         s = db.Session()
         a = Apartment(**item)
         s.add(a)

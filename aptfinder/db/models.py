@@ -1,4 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import func
 from sqlalchemy import (Column, String, Integer,
                         DateTime, Numeric, Boolean,
                         Float)
@@ -13,7 +14,12 @@ class Apartment(BaseModel):
         for key, value in data.items():
             setattr(self, key, value)
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    created_at = Column(DateTime,
+                        server_default=func.current_timestamp())
+    touched_at = Column(DateTime,
+                        server_default=func.current_timestamp(),
+                        onupdate=func.current_timestamp())
     date_listed = Column(DateTime)
     url = Column(String, unique=True, nullable=False)
     address = Column(String)

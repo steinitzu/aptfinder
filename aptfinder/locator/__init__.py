@@ -20,7 +20,7 @@ def apartments_in_radius(center, radius_meters):
     rkm = radius_meters/1000
     s = db.Session()
 
-    for apt in s.query(Apartment):
+    for apt in s.query(Apartment).filter(Apartment.latitude != None):
         d = haversine((apt.latitude, apt.longitude), center)
         if d <= rkm:
             yield apt
