@@ -32,7 +32,6 @@ def haversine(pointa, pointb):
     on the earth in kilometers.
     pointa and pointb must be lat and lng coordinates in radians
     """
-    print(pointa, pointb)
     lat1, lng1 = pointa
     lat2, lng2 = pointb
 

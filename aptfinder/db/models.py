@@ -24,3 +24,9 @@ class Apartment(BaseModel):
     furnished = Column(Boolean)
     latitude = Column(Float)
     longitude = Column(Float)
+
+    def json(self):
+        j = {}
+        for key in self._sa_class_manager.keys():
+            j[key] = getattr(self, key)
+        return j
