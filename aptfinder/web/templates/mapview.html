@@ -1,10 +1,31 @@
 {% extends 'layout.html' %}
+
+
 {% block content %}
     {{ super() }}
+    <div id="templates">
+        {% raw %}
+            <template id=ltempl>
+                <p>
+                    <a href ="{{ url }}">
+                        {{ address }}
+                    </a>
+                </p>
+            </template>
+        {% endraw %}
+    </div>
+    <div id="listings">
+        <p> Hello </p>
+    </div>
     <div id="map"></div>
+
 {% endblock %}
 {% block script %}
     {{ super() }}
+    <script src="{{url_for('static', filename='lib/wcstamp/src/stamp.js')}}"></script>
+    <script type="text/javascript" charset="utf-8">
+     var ctx = new Stamp.Context();
+    </script>
     <script src="{{url_for('static', filename='js/map.js')}}"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key={{gmaps_key}}&callback=initMap"
             async defer></script>

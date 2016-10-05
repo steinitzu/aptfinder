@@ -25,6 +25,7 @@ function clear_markers(map) {
     markers = [];
 };
 
+
 function update_listings(circle) {
 
     var bounds = circle.getBounds().toJSON();
@@ -39,7 +40,14 @@ function update_listings(circle) {
     }).then(function(response) {
         response.json().then(function(result) {
             clear_markers(map);
+            // Clear text listings
+            var listings = document.getElementById("listings");
+            while (listings.firstChild) {
+                listings.removeChild(listings.firstChild);
+            };
             result.forEach(function(listing){
+                var expanded = Stamp.expand(ctx.import('ltempl'), listing);
+                Stamp.appendChildren(document.getElementById('listings'), expanded);
                 var p = new google.maps.LatLng(
                     listing['latitude'] * (180/Math.PI),
                     listing['longitude'] * (180/Math.PI));
