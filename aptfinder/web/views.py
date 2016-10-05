@@ -1,3 +1,5 @@
+from math import radians
+
 from flask import render_template, request, jsonify
 
 from . import app
@@ -13,10 +15,12 @@ def index():
 @app.route('/get_apts', methods=['GET'])
 def apartments_in_circle():
     center = to_radians(
-        float(request.args.get('lat')),
-        float(request.args.get('lng')))
+        float(request.args.get('center_lat')),
+        float(request.args.get('center_lng')))
     radius = float(request.args.get('radius'))
+    bounds = {key: radians(float(request.args[key]))
+              for key in ('north', 'south', 'east', 'west')}
     apts = []
-    for apt in apartments_in_radius(center, radius):
+    for apt in apartments_in_radius(center, radius, bounds):
         apts.append(apt.json())
     return jsonify(apts)

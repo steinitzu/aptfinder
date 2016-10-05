@@ -6,30 +6,44 @@ function EncodeQueryData(data)
    return ret.join("&");
 }
 
+var markers = [];
+
+
+function add_marker(point, title, map) {
+    var marker = new google.maps.Marker({
+        position: point,
+        title:title
+    });
+    marker.setMap(map);
+    markers.push(marker);
+};
+
+function clear_markers(map) {
+    markers.forEach(function(marker){
+        marker.setMap(null);
+    });
+    markers = [];
+};
 
 function update_listings(circle) {
 
-    var data = EncodeQueryData({'radius': circle.getRadius(),
-                                'lat': circle.getCenter().lat(),
-                                'lng': circle.getCenter().lng()});
+    var bounds = circle.getBounds().toJSON();
+    Object.assign(bounds, {'radius': circle.getRadius(),
+                           'center_lat': circle.getCenter().lat(),
+                           'center_lng': circle.getCenter().lng()});
+    var data = EncodeQueryData(bounds);
+
     fetch('/get_apts?'+data, {
         method: 'GET',
         credentials: 'same-origin'
     }).then(function(response) {
         response.json().then(function(result) {
-            // TODO: Display results
+            clear_markers(map);
             result.forEach(function(listing){
                 var p = new google.maps.LatLng(
                     listing['latitude'] * (180/Math.PI),
                     listing['longitude'] * (180/Math.PI));
-                var marker = new google.maps.Marker({
-                    position: p,
-                    title:listing['address']
-                });
-                marker.setMap(map);
-
-                // TODO: delete the old markers
-                console.log(marker);
+                add_marker(p, listing['address'], map);
 
                 console.log(listing);
             });
@@ -39,6 +53,7 @@ function update_listings(circle) {
 };
 
 var map;
+var center_timer;
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 43.660064, lng: -79.568268},
@@ -61,6 +76,9 @@ function initMap() {
         update_listings(filter_circle);
     });
     google.maps.event.addListener(filter_circle, 'center_changed', function() {
-        update_listings(filter_circle);
+        // Set a timer to prevent fetching while user is dragging
+        clearTimeout(center_timer);
+        center_timer = setTimeout(function() { update_listings(filter_circle); },
+                                  100);
     });
 }

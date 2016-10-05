@@ -12,7 +12,7 @@ def to_radians(lat, lng):
     return radians(lat), radians(lng)
 
 
-def apartments_in_radius(center, radius_meters):
+def apartments_in_radius(center, radius_meters, bounds):
     """
     Get all Apartments falling inside
     circle with given center and radius.
@@ -20,7 +20,21 @@ def apartments_in_radius(center, radius_meters):
     rkm = radius_meters/1000
     s = db.Session()
 
-    for apt in s.query(Apartment).filter(Apartment.latitude != None):
+    q = s.query(Apartment)
+    bn, bs, be, bw = (bounds['north'], bounds['south'],
+                      bounds['east'], bounds['west'])
+
+    # Start by selecting all listings that fall within
+    # the circle's bounds (treat it like a rectangle)
+    filterq = q.filter(Apartment.latitude != None,
+                       Apartment.latitude <= bn,
+                       Apartment.latitude >= bs,
+                       Apartment.longitude <= be,
+                       Apartment.longitude >= bw)
+
+    # Next, check haversine distance for found listings
+    # for a more precise result
+    for apt in filterq:
         d = haversine((apt.latitude, apt.longitude), center)
         if d <= rkm:
             yield apt
