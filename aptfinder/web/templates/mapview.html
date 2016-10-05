@@ -6,18 +6,40 @@
     <div id="templates">
         {% raw %}
             <template id=ltempl>
-                <p>
-                    <a href ="{{ url }}">
-                        {{ address }}
+                <li>
+                    <a  class="hide-overflow" href ="{{ url }}">
+                        {{ title }}
                     </a>
-                </p>
+                    <ul>
+                        <li>
+                            {{ price_currency }} {{ price }}
+                        </li>
+                    </ul>
+                </li>
             </template>
         {% endraw %}
     </div>
-    <div id="listings">
-        <p> Hello </p>
+    <div class="container u-full-width u-max-full-width u-full-height">
+        <div class="form">
+            <div class="row">
+                <div class="six columns">
+                    <label>Search
+                        <input type="search" placeholder="2 bedroom" id="search_input">
+                    </label>
+
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="eight columns" id="map">
+
+            </div>
+            <div class="four columns" >
+                <ul id="listings">
+                </ul>
+            </div>
+        </div>
     </div>
-    <div id="map"></div>
 
 {% endblock %}
 {% block script %}

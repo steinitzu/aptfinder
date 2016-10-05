@@ -1,0 +1,32 @@
+#map {
+    height: 85vh;
+}
+
+#listings {
+    overflow-y: scroll;
+    height: 85vh;
+}
+
+.columns {
+    margin-left: 1%;
+}
+
+html {
+    margin-left: 4em;
+    margin-right: 4em;
+    margin-top: 2em;
+    margin-bottom: 2em;
+}
+
+.u-full-height {
+    height: 95vh;
+}
+
+.hide-overflow
+{
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    margin-left:1em;
+    display:block;
+}

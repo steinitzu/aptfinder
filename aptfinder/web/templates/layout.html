@@ -3,16 +3,22 @@
     <head>
         {% block head %}
             <title>Simple Map</title>
-            <meta name="viewport" content="initial-scale=1.0">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <meta charset="utf-8">
-            <style>
-             html, body {
+            <link rel="stylesheet"
+                  href="{{url_for('static', filename='lib/skeleton/css/normalize.css')}}">
+            <link rel="stylesheet"
+                  href="{{url_for('static', filename='lib/skeleton/css/skeleton.css')}}">
+            <link rel="stylesheet"
+                  href="{{url_for('static', filename='css/style.css')}}">
+            <!-- <style>
+                 html, body {
                  height: 100%;
-             }
-             #map {
+                 }
+                 #map {
                  height: 50%;
-             }
-            </style>
+                 }
+                 </style> -->
         {% endblock %}
     </head>
     <body>
