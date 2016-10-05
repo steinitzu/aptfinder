@@ -22,6 +22,7 @@ class Apartment(BaseModel):
                         onupdate=func.current_timestamp())
     date_listed = Column(DateTime)
     url = Column(String, unique=True, nullable=False)
+    title = Column(String)
     address = Column(String)
     price = Column(Numeric)
     price_currency = Column(String, default='CAD')

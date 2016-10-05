@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 from decimal import Decimal
+from math import radians
 
 import scrapy
 from dateutil.parser import parse as dateparse
@@ -34,6 +35,20 @@ class ApartmentsSpider(scrapy.Spider):
         table = response.css('.ad-attributes')
         rows = table.xpath('//tr')
         result = {}
+
+        name = response.css('[itemprop="name"]').css('h1')
+        name = name.xpath('text()').extract_first()
+
+        lat = response.css(
+            '[property="og:latitude"]::attr("content")').extract_first()
+        lng = response.css(
+            '[property="og:longitude"]::attr("content")').extract_first()
+
+        result['latitude'] = radians(float(lat))
+        result['longitude'] = radians(float(lng))
+
+        result['title'] = name
+
         result['url'] = response.url
         for row in rows:
             try:
