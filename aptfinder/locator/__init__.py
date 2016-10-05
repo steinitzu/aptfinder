@@ -38,6 +38,7 @@ def apartments_in_radius(center, radius_meters, bounds):
         d = haversine((apt.latitude, apt.longitude), center)
         if d <= rkm:
             yield apt
+    s.close()
 
 
 def haversine(pointa, pointb):
