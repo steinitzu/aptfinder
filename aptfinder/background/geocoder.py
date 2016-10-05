@@ -45,6 +45,8 @@ def geocode(apartments):
         apt.latitude = lat
         apt.longitude = lng
         s.add(apt)
+        if i % 100 == 0:
+            s.flush()
     s.commit()
 
 
