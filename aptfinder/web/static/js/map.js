@@ -1,13 +1,6 @@
-function EncodeQueryData(data)
-{
-   var ret = [];
-   for (var d in data)
-      ret.push(encodeURIComponent(d) + "=" + encodeURIComponent(data[d]));
-   return ret.join("&");
-}
-
 var markers = [];
-
+var listings = [];
+var sort_order;
 
 function add_marker(point, title, map) {
     var marker = new google.maps.Marker({
@@ -26,6 +19,43 @@ function clear_markers(map) {
 };
 
 
+function clear_listings_el() {
+    var listingsel = document.getElementById("listings");
+    while (listingsel.firstChild) {
+        listingsel.removeChild(listingsel.firstChild);
+    };
+};
+
+
+function add_to_listings_el(listing) {
+    var expanded = Stamp.expand(ctx.import('ltempl'), listing);
+    Stamp.appendChildren(document.getElementById('listings'), expanded);
+};
+
+
+function populate_listings_el(){
+    listings.forEach(function(listing){
+        add_to_listings_el(listing);
+    });
+};
+
+
+
+function sort_listings(key) {
+    var reverse;
+    if (sort_order) {
+        reverse = true;
+        sort_order = false;
+    } else {
+        reverse = false;
+        sort_order = true;
+    };
+    sort_by_key(listings, key, reverse=reverse);
+    clear_listings_el();
+    populate_listings_el();
+
+};
+
 function update_listings(circle) {
 
     var bounds = circle.getBounds().toJSON();
@@ -41,24 +71,23 @@ function update_listings(circle) {
         response.json().then(function(result) {
             clear_markers(map);
             // Clear text listings
-            var listings = document.getElementById("listings");
-            while (listings.firstChild) {
-                listings.removeChild(listings.firstChild);
-            };
+            clear_listings_el();
+
+            listings = [];
             result.forEach(function(listing){
-                var expanded = Stamp.expand(ctx.import('ltempl'), listing);
-                Stamp.appendChildren(document.getElementById('listings'), expanded);
+                add_to_listings_el(listing);
                 var p = new google.maps.LatLng(
                     listing['latitude'] * (180/Math.PI),
                     listing['longitude'] * (180/Math.PI));
                 add_marker(p, listing['address'], map);
-
-                console.log(listing);
+                listings.push(listing);
             });
         });
     });
-
 };
+
+
+
 
 var map;
 var center_timer;

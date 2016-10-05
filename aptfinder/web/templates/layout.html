@@ -25,6 +25,7 @@
         {% block content %}
         {% endblock %}
         {% block script %}
+            <script src="{{url_for('static', filename='js/util.js')}}"></script>
         {% endblock %}
     </body>
 </html>
