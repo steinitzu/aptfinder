@@ -1,6 +1,24 @@
 var markers = [];
 var listings = [];
 var sort_order;
+var map;
+var center_timer;
+
+class Listing {
+    constructor(data) {
+        // Accepts json data
+        this.data = data;
+        var p = new google.maps.LatLng(
+            // TODO: Should request coords in degrees
+            data['latitude'] * (180/Math.PI),
+            data['longitude'] * (180/Math.PI));
+        this.marker = new google.maps.Marker({
+            position: point,
+            title: data['title']});
+        // Can be added through Stamp.appendChildren
+        this.el = Stamp.expand(ctx.import('ltempl'), data);
+    }
+}
 
 function add_marker(point, title, map) {
     var marker = new google.maps.Marker({
@@ -38,8 +56,6 @@ function populate_listings_el(){
         add_to_listings_el(listing);
     });
 };
-
-
 
 function sort_listings(key) {
     var reverse;
@@ -86,11 +102,6 @@ function update_listings(circle) {
     });
 };
 
-
-
-
-var map;
-var center_timer;
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 43.660064, lng: -79.568268},
