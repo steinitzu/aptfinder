@@ -1,3 +1,5 @@
+from math import degrees as to_degrees
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import func
 from sqlalchemy import (Column, String, Integer,
@@ -32,8 +34,11 @@ class Apartment(BaseModel):
     latitude = Column(Float)
     longitude = Column(Float)
 
-    def json(self):
+    def json(self, degrees=False):
         j = {}
         for key in self._sa_class_manager.keys():
-            j[key] = getattr(self, key)
+            val = getattr(self, key)
+            if key in ('latitude', 'longitude') and degrees:
+                val = to_degrees(val)
+            j[key] = val
         return j

@@ -1,4 +1,4 @@
-function sort_by_key(array, key, reverse=false) {
+function sort_by_key(array, key, reverse) {
     return array.sort(function(a, b) {
         var x = a[key]; var y = b[key];
         if (reverse) {

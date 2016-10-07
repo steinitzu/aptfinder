@@ -20,6 +20,78 @@ class Listing {
     }
 }
 
+
+class ListingsMgr {
+    constructor(...listings) {
+        this.listings = listings;
+        this.sort_order = false;
+    }
+
+    clear_markers() {
+        this.listings.forEach(function(listing){
+            // Remove from map
+            listing.marker.setMap(null);
+        });
+    }
+
+    clear_list_view() {
+        var listings_el = document.getElementById("listings");
+        while (listings_el.firstChild) {
+            listings_el.removeChild(listings_el.firstChild);
+        };
+    }
+
+    // Clear all listings from map, sidebar and array
+    clear_all() {
+        this.clear_markers();
+        this.clear_list_view();
+        this.listings = [];
+    }
+
+    fill_markers() {
+        this.listings.forEach(function(listing){
+            listing.marker.setMap(map);
+        });
+    }
+
+    fill_list_view() {
+        this.listings.forEach(function(listing){
+            Stamp.appendChildren(document.getElementById('listings'),
+                                 listing.el);
+        });
+    }
+
+    replace_listings(...listings) {
+        this.listings = listings;
+        this.fill_markers();
+        this.fill_list_view();
+    }
+
+    sort(key) {
+        // should prepend data to key before sort (listing.data)
+        var reverse = this.sort_order;
+        this.sort_order = !this.sort_order;
+        if (this.sort_order) {
+            reverse = true;
+            sort_order = false;
+        } else {
+            reverse = false;
+            sort_order = true;
+        };
+        sort_by_key(this.listings, key, reverse);
+        this.replace_listings(...this.listings);
+
+};
+
+
+}
+
+
+var listingsmgr = new ListingsMgr();
+
+
+
+///////////////////
 function add_marker(point, title, map) {
     var marker = new google.maps.Marker({
         position: point,
@@ -77,7 +149,8 @@ function update_listings(circle) {
     var bounds = circle.getBounds().toJSON();
     Object.assign(bounds, {'radius': circle.getRadius(),
                            'center_lat': circle.getCenter().lat(),
-                           'center_lng': circle.getCenter().lng()});
+                           'center_lng': circle.getCenter().lng(),
+                           'coordtype': 'degrees'});
     var data = EncodeQueryData(bounds);
 
     fetch('/get_apts?'+data, {
@@ -85,16 +158,16 @@ function update_listings(circle) {
         credentials: 'same-origin'
     }).then(function(response) {
         response.json().then(function(result) {
+            // TODO: should be able to just listingsmgr.replace_listings here
             clear_markers(map);
             // Clear text listings
             clear_listings_el();
-
             listings = [];
             result.forEach(function(listing){
                 add_to_listings_el(listing);
                 var p = new google.maps.LatLng(
-                    listing['latitude'] * (180/Math.PI),
-                    listing['longitude'] * (180/Math.PI));
+                    listing['latitude'],
+                    listing['longitude']);
                 add_marker(p, listing['address'], map);
                 listings.push(listing);
             });

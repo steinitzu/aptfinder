@@ -20,7 +20,8 @@ def apartments_in_circle():
     radius = float(request.args.get('radius'))
     bounds = {key: radians(float(request.args[key]))
               for key in ('north', 'south', 'east', 'west')}
+    degrees = request.args.get('coordtype', 'radians') == 'degrees'
     apts = []
     for apt in apartments_in_radius(center, radius, bounds):
-        apts.append(apt.json())
+        apts.append(apt.json(degrees=degrees))
     return jsonify(apts)
