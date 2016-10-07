@@ -19,3 +19,11 @@ def get_or_create(session, model, **kwargs):
     else:
         instance = model(**kwargs)
         return instance
+
+
+def get_if_exists(session, model, **filterkw):
+    item = session.query(model).filter_by(**filterkw).first()
+    if item:
+        return item
+    else:
+        return False

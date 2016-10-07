@@ -23,16 +23,12 @@ class SQLAlchemyPipeline(object):
         db.init_db()
 
     def process_item(self, item, spider):
-        # loc = self.gmaps.geocode(item['address'])[0]
-        # lat = radians(loc['geometry']['location']['lat'])
-        # lng = radians(loc['geometry']['location']['lng'])
-        # item['latitude'] = lat
-        # item['longitude'] = lng
         s = db.Session()
-        apt = db.get_or_create(s, Apartment, url=item['url'])
-        if apt.id:
+        apt = db.get_if_exists(s, Apartment, url=item['url'])
+        if apt:
             log.info('Apartment url: "{}" already exists'.format(
                 apt.url))
             return  # already exists, done
+        apt = Apartment(**item)
         s.add(apt)
         s.commit()
