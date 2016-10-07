@@ -46,6 +46,7 @@ class ApartmentsSpider(scrapy.Spider):
 
         result['latitude'] = radians(float(lat))
         result['longitude'] = radians(float(lng))
+        result['geocode_source'] = 'kijiji'
 
         result['title'] = name
 

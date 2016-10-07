@@ -33,6 +33,7 @@ class Apartment(BaseModel):
     furnished = Column(Boolean)
     latitude = Column(Float)
     longitude = Column(Float)
+    geocode_source = Column(String)
 
     def json(self, degrees=False):
         j = {}
