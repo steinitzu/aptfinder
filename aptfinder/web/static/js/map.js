@@ -1,6 +1,3 @@
-var markers = [];
-var listings = [];
-var sort_order;
 var map;
 var center_timer;
 
@@ -10,16 +7,20 @@ class Listing {
         this.data = data;
         var p = new google.maps.LatLng(
             // TODO: Should request coords in degrees
-            data['latitude'] * (180/Math.PI),
-            data['longitude'] * (180/Math.PI));
+            data['latitude'],
+            data['longitude']);
         this.marker = new google.maps.Marker({
-            position: point,
+            position: p,
             title: data['title']});
         // Can be added through Stamp.appendChildren
-        this.el = Stamp.expand(ctx.import('ltempl'), data);
+        this.el = this.new_el();
+    }
+
+    new_el() {
+        this.el = Stamp.expand(ctx.import('ltempl'), this.data);
+        return this.el;
     }
 }
-
 
 class ListingsMgr {
     constructor(...listings) {
@@ -57,92 +58,45 @@ class ListingsMgr {
     fill_list_view() {
         this.listings.forEach(function(listing){
             Stamp.appendChildren(document.getElementById('listings'),
-                                 listing.el);
+                                 listing.new_el());
         });
     }
 
     replace_listings(...listings) {
+        this.clear_all();
         this.listings = listings;
         this.fill_markers();
         this.fill_list_view();
+    }
+
+    refresh() {
+        this.clear_list_view();
+        this.clear_markers();
+        this.fill_markers();
+        this.fill_list_view();
+    }
+
+    add(listing) {
+        this.listings.push(listing);
+        listing.marker.setMap(map);
+        Stamp.appendChildren(document.getElementById('listings'),
+                             listing.el);
     }
 
     sort(key) {
         // should prepend data to key before sort (listing.data)
         var reverse = this.sort_order;
         this.sort_order = !this.sort_order;
-        if (this.sort_order) {
-            reverse = true;
-            sort_order = false;
-        } else {
-            reverse = false;
-            sort_order = true;
-        };
+        console.log(this.listings);
         sort_by_key(this.listings, key, reverse);
-        this.replace_listings(...this.listings);
-
-};
-
-
+        console.log(this.listings);
+        this.refresh();
+    };
 }
 
 
 var listingsmgr = new ListingsMgr();
 
-
-
-///////////////////
-function add_marker(point, title, map) {
-    var marker = new google.maps.Marker({
-        position: point,
-        title:title
-    });
-    marker.setMap(map);
-    markers.push(marker);
-};
-
-function clear_markers(map) {
-    markers.forEach(function(marker){
-        marker.setMap(null);
-    });
-    markers = [];
-};
-
-
-function clear_listings_el() {
-    var listingsel = document.getElementById("listings");
-    while (listingsel.firstChild) {
-        listingsel.removeChild(listingsel.firstChild);
-    };
-};
-
-
-function add_to_listings_el(listing) {
-    var expanded = Stamp.expand(ctx.import('ltempl'), listing);
-    Stamp.appendChildren(document.getElementById('listings'), expanded);
-};
-
-
-function populate_listings_el(){
-    listings.forEach(function(listing){
-        add_to_listings_el(listing);
-    });
-};
-
-function sort_listings(key) {
-    var reverse;
-    if (sort_order) {
-        reverse = true;
-        sort_order = false;
-    } else {
-        reverse = false;
-        sort_order = true;
-    };
-    sort_by_key(listings, key, reverse=reverse);
-    clear_listings_el();
-    populate_listings_el();
-
-};
 
 function update_listings(circle) {
 
@@ -158,18 +112,9 @@ function update_listings(circle) {
         credentials: 'same-origin'
     }).then(function(response) {
         response.json().then(function(result) {
-            // TODO: should be able to just listingsmgr.replace_listings here
-            clear_markers(map);
-            // Clear text listings
-            clear_listings_el();
-            listings = [];
-            result.forEach(function(listing){
-                add_to_listings_el(listing);
-                var p = new google.maps.LatLng(
-                    listing['latitude'],
-                    listing['longitude']);
-                add_marker(p, listing['address'], map);
-                listings.push(listing);
+            listingsmgr.clear_all();
+            result.forEach(function(data){
+                listingsmgr.add(new Listing(data));
             });
         });
     });
