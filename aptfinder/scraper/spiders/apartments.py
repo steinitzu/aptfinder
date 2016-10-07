@@ -12,10 +12,24 @@ from .util import yes_no_bool
 class ApartmentsSpider(scrapy.Spider):
     name = "apartments"
     allowed_domains = ["kijiji.ca"]
-    start_urls = (('http://www.kijiji.ca'
-                   '/b-apartments-condos'
-                   '/gta-greater-toronto-area'
-                   '/c37l1700272?ad=offering&pet-friendly=1/'),)
+
+    # TODO: get bedroom number from url
+    start_urls = [
+        'http://www.kijiji.ca/b-2-bedroom-apartments-condos/gta-greater-toronto-area/c214l1700272?ad=offering',
+        'http://www.kijiji.ca/b-1-bedroom-apartments-condos/gta-greater-toronto-area/c212l1700272?ad=offering',
+        'http://www.kijiji.ca/b-1-bedroom-den-apartments-condos/gta-greater-toronto-area/c213l1700272?ad=offering',
+        'http://www.kijiji.ca/b-bachelor-studio-apartments-condos/gta-greater-toronto-area/c211l1700272?ad=offering',
+        'http://www.kijiji.ca/b-3-bedroom-apartments-condos/gta-greater-toronto-area/c215l1700272?ad=offering',
+        'http://www.kijiji.ca/b-4-plus-bedroom-apartments-condos/gta-greater-toronto-area/c216l1700272?ad=offering']
+
+    bed_map = {
+        '2-bedroom-apartments-condos': '2 bedroom',
+        '1-bedroom-apartments-condos': '1 bedroom',
+        '3-bedroom-apartments-condos': '3 bedroom',
+        '4-plus-bedroom-apartments-condos': '4 bedroom',
+        'bachelor-studio-apartments-condos': 'studio',
+        '1-bedroom-den-apartments-condos': '1 bedroom'
+    }
 
     def parse(self, response):
         for title in response.css('.search-item'):
@@ -50,7 +64,8 @@ class ApartmentsSpider(scrapy.Spider):
 
         result['title'] = name
 
-        result['url'] = response.url
+        url = response.url
+        result['url'] = url
         for row in rows:
             try:
                 heading, data = row.xpath('./th|./td')
@@ -84,4 +99,9 @@ class ApartmentsSpider(scrapy.Spider):
             elif data.lower() in ('yes', 'no'):
                 data = yes_no_bool(data)
             result[heading] = data
+
+        for key, value in self.bed_map.items():
+            if key in result['url']:
+                result['bedrooms'] = value
+                break
         return result

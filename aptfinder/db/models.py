@@ -29,6 +29,7 @@ class Apartment(BaseModel):
     price = Column(Numeric)
     price_currency = Column(String, default='CAD')
     pet_friendly = Column(Boolean)
+    bedrooms = Column(String)
     bathrooms = Column(Integer)
     furnished = Column(Boolean)
     latitude = Column(Float)
