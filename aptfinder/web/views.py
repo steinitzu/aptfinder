@@ -1,4 +1,5 @@
 from math import radians
+from math import degrees as to_degrees
 
 from flask import render_template, request, jsonify
 
@@ -23,5 +24,10 @@ def apartments_in_circle():
     degrees = request.args.get('coordtype', 'radians') == 'degrees'
     apts = []
     for apt in apartments_in_radius(center, radius, bounds):
-        apts.append(apt.json(degrees=degrees))
+        apt = dict(apt)
+
+        apt['latitude'] = to_degrees(apt['latitude'])
+        apt['longitude'] = to_degrees(apt['longitude'])
+        apts.append(apt)
+        #apts.append(apt.json(degrees=degrees))
     return jsonify(apts)

@@ -18,27 +18,38 @@ def apartments_in_radius(center, radius_meters, bounds):
     circle with given center and radius.
     """
     rkm = radius_meters/1000
-    s = db.Session()
+    #s = db.Session()
 
-    q = s.query(Apartment)
+    #q = s.query(Apartment)
     bn, bs, be, bw = (bounds['north'], bounds['south'],
                       bounds['east'], bounds['west'])
 
+    res = db.engine.execute(
+        '''
+        SELECT * FROM apartment WHERE
+        latitude <= %s AND
+        latitude >= %s AND
+        longitude <= %s AND
+        longitude >= %s;
+        ''',
+        (bn, bs, be, bw))
+
     # Start by selecting all listings that fall within
     # the circle's bounds (treat it like a rectangle)
-    filterq = q.filter(Apartment.latitude != None,
-                       Apartment.latitude <= bn,
-                       Apartment.latitude >= bs,
-                       Apartment.longitude <= be,
-                       Apartment.longitude >= bw)
+    # filterq = q.filter(Apartment.latitude != None,
+    #                    Apartment.latitude <= bn,
+    #                    Apartment.latitude >= bs,
+    #                    Apartment.longitude <= be,
+    #                    Apartment.longitude >= bw)
 
     # Next, check haversine distance for found listings
     # for a more precise result
-    for apt in filterq:
-        d = haversine((apt.latitude, apt.longitude), center)
+    for apt in res:
+        d = haversine((apt['latitude'], apt['longitude']), center)
         if d <= rkm:
             yield apt
-    s.close()
+    res.close()
+    #s.close()
 
 
 def haversine(pointa, pointb):
