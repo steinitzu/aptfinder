@@ -5,6 +5,7 @@ from flask import render_template, request, jsonify
 
 from . import app
 from ..locator import to_radians, apartments_in_radius
+from .. import db
 
 
 @app.route('/')
@@ -24,6 +25,23 @@ def apartments_in_circle():
     degrees = request.args.get('coordtype', 'radians') == 'degrees'
     apts = []
     for apt in apartments_in_radius(center, radius, bounds):
+        apt = dict(apt)
+
+        apt['latitude'] = to_degrees(apt['latitude'])
+        apt['longitude'] = to_degrees(apt['longitude'])
+        apts.append(apt)
+        #apts.append(apt.json(degrees=degrees))
+    return jsonify(apts)
+
+
+@app.route('/random_apts', methods=['GET'])
+def random_apts():
+    num = int(request.args.get('num'))
+    c = db.engine.execute('SELECT * FROM apartment')
+    res = c.fetchmany(num)
+    c.close()
+    apts = []
+    for apt in res:
         apt = dict(apt)
 
         apt['latitude'] = to_degrees(apt['latitude'])
