@@ -30,7 +30,6 @@ def apartments_in_radius(center, radius_meters, bounds):
         longitude >= %s;
         ''',
         (None, bn, bs, be, bw))
-
     for apt in res:
         d = haversine((apt['latitude'], apt['longitude']), center)
         if d <= rkm:

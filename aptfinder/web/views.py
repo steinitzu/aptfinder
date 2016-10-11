@@ -10,7 +10,7 @@ from .. import db
 
 @app.route('/')
 def index():
-    return render_template('mapview.html',
+    return render_template('reactmap.html',
                            gmaps_key=app.config['GOOGLE_MAPS_API_KEY'])
 
 

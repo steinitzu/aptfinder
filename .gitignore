@@ -89,3 +89,4 @@ ENV/
 .ropeproject
 
 .dir-locals.el
+/intenv.py

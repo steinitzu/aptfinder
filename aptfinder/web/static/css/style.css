@@ -1,32 +1,73 @@
-#map {
-    height: 85vh;
+/* html, */
+/* body, */
+/* .GMap { */
+/*   height: 100%; */
+/*   position: absolute; */
+/*   width: 100%; */
+/* } */
+
+/* .GMap-canvas { */
+/*   top: 20px; */
+/*   display: block; */
+/*   height: 100%; */
+/* } */
+/* .UpdatedText { */
+/*   color: red; */
+/* } */
+
+
+
+/* .u-full-height { */
+/*     height: 95vh; */
+/* } */
+
+/* .hide-overflow */
+/* { */
+/*     overflow:hidden; */
+/*     white-space:nowrap; */
+/*     text-overflow:ellipsis; */
+/*     margin-left:1em; */
+/*     display:block; */
+/* } */
+
+
+html,
+body {
+    height: 100vh;
 }
 
-#listings {
+.gmap-container {
+    height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 100%;
+}
+
+.GMap {
+    height: 100vh;
+}
+
+.GMap-canvas {
+    height:  97vh;
+}
+
+.listings-list {
     overflow-y: scroll;
-    height: 85vh;
+    height: 97vh;
+    margin-left: 0;
 }
 
-.columns {
-    margin-left: 1%;
-}
+/* .columns { */
+/*     margin-left: 1em; */
+/* } */
 
-html {
-    margin-left: 4em;
-    margin-right: 4em;
-    margin-top: 2em;
-    margin-bottom: 2em;
-}
 
-.u-full-height {
-    height: 95vh;
-}
-
-.hide-overflow
-{
+.hide-overflow {
     overflow:hidden;
     white-space:nowrap;
     text-overflow:ellipsis;
-    margin-left:1em;
+    margin-right:1em;
     display:block;
 }
