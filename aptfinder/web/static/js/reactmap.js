@@ -88,7 +88,7 @@ class GMap extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {zoom: 14};
+        this.state = {zoom: 11};
 
     }
 
@@ -113,7 +113,12 @@ class GMap extends React.Component {
     }
 
     componentWillUpdate(nextProps, nextState) {
+        setTimeout((p) => this.replaceMarkers(nextProps), 0);
         console.log(nextProps);
+
+    }
+
+    replaceMarkers(nextProps) {
         for (var i = 0; i < this.markers.length; i++) {
             this.markers[i].setMap(null);
         }
@@ -125,6 +130,10 @@ class GMap extends React.Component {
 
             this.markers.push(this.createMarker(p));
         };
+    }
+
+    handleChange(e) {
+        console.log('handling change');
     }
 
     createMap() {
@@ -158,7 +167,7 @@ class GMap extends React.Component {
             strokeOpacity: 0.1,
             map: this.map,
             center: this.map.getCenter(),
-            radius: 1000,
+            radius: 5000,
             editable: true,
             draggable: true
         });
@@ -171,36 +180,15 @@ class GMap extends React.Component {
     }
 }
 
-
-
 class Listings extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {items: []};
-
     }
 
     componentDidMount() {
         //console.log(this.props.children);
-    }
-
-    loadData(circle) {
-        var bounds = circle.getBounds().toJSON();
-        Object.assign(bounds, {'radius': circle.getRadius(),
-                               'center_lat': circle.getCenter().lat(),
-                               'center_lng': circle.getCenter().lng(),
-                               'coordtype': 'degrees'});
-        var data = EncodeQueryData(bounds);
-
-        fetch('/get_apts'+'?'+data, {
-            method: 'GET',
-            credentials: 'same-origin'})
-            .then(response => response.json())
-            .then(json => {
-                this.setState({items: json});
-            });
-
     }
 
     render() {
