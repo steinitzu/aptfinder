@@ -18,6 +18,7 @@ class ParentMan extends React.Component {
 
     constructor(props) {
         super(props);
+        this.isLoading = false;
         this.state = {items: []};
 
     }
@@ -51,7 +52,7 @@ class ParentMan extends React.Component {
     }
 
     componentWillUpdate(nextProps, nextState) {
-        console.log('updating parent');
+        console.log('updating parent', nextState);
     }
 
     circleRadiusChanged(c, props) {
@@ -65,6 +66,20 @@ class ParentMan extends React.Component {
         circleCenterTimer = setTimeout((t) => props.parent.loadData(c), 80);
     }
 
+    // shouldComponentUpdate(nextProps, nextState){
+    //     if(this.isLoading) {
+    //         return false;
+    //     };
+    //     return true;
+
+    // }
+
+    setChunkedState(items) {
+        console.log('jsonpipe got: ', items);
+
+        this.setState((state) => ({ items: state.items.concat([items]) }));
+    }
+
     loadData(circle) {
         var bounds = circle.getBounds().toJSON();
         Object.assign(bounds, {'radius': circle.getRadius(),
@@ -72,6 +87,25 @@ class ParentMan extends React.Component {
                                'center_lng': circle.getCenter().lng(),
                                'coordtype': 'degrees'});
         var data = EncodeQueryData(bounds);
+
+        // TODO: use jsonpipe
+        // TODO: for each json, create marker here
+        // TODO: for each json, set marker attribute
+
+        // Clear items before starting
+        // this.setState({items: []});
+        // this.isLoading = true;
+        // jsonpipe.flow('/get_apts'+'?'+data,
+        //               {'delimeter': '\n\n',
+        //                // bind(this) used so we have a reference to this
+        //                'success': this.setChunkedState.bind(this),
+        //                'complete': function(status) {
+        //                    this.setState(this.state);
+        //                    console.log('JSONPIPE complete');
+        //                }.bind(this)
+        //               }
+        //              );
+
 
         fetch('/get_apts'+'?'+data, {
             method: 'GET',
@@ -208,7 +242,6 @@ class Listings extends React.Component {
 
     componentWillUpdate(nextProps, nextState) {
         console.log('updating listings ', nextProps);
-        sortByKey(nextProps.items, 'price');
     }
 
 };

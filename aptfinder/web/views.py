@@ -75,3 +75,17 @@ def generate(items):
         prev_item = item
     # Now yield the last iteration without comma but with the closing brackets
     yield json.dumps(prev_item) + ']'
+
+
+def pipe_generate(items):
+    try:
+        prev_item = next(items)  # get first result
+    except StopIteration:
+        # StopIteration here means the length was zero,
+        # so yield a valid items doc and stop
+        yield ''
+        raise StopIteration
+    # Iterate over the items
+    for item in items:
+        yield json.dumps(prev_item) + '\n\n'
+        prev_item = item
