@@ -16,21 +16,36 @@ def apartments_in_radius(center, radius_meters, bounds):
     circle with given center and radius.
     """
     rkm = radius_meters/1000
+    rrad = rkm/EARTH_RADIUS
 
     bn, bs, be, bw = (bounds['north'], bounds['south'],
                       bounds['east'], bounds['west'])
+
+    q = '''SELECT * FROM apartment WHERE
+    price is not %s
+    AND
+    (latitude => 1.2393 AND latitude <= 1.5532) AND (longitude >= -1.8184 AND longitude <= 0.4221)
+    AND
+    acos(sin(1.3963) * sin(Lat) + cos(1.3963) * cos(Lat) * cos(Lon - (-0.6981))) <= 0.1570;'''
 
     res = db.engine.execute(
         '''
         SELECT * FROM apartment WHERE
         price is not %s AND
-        latitude <= %s AND
+        (latitude <= %s AND
         latitude >= %s AND
         longitude <= %s AND
-        longitude >= %s;
+        longitude >= %s) AND
+        acos(sin(%s) * sin(latitude) + cos(%s) * cos(latitude) * cos(longitude - (%s))) <= %s;
         ''',
-        (None, bn, bs, be, bw))
+        (None, bn, bs, be, bw,
+         center[0], center[0], center[1], rrad))
     for apt in res:
+        yield apt
+    res.close()
+    return
+
+    for apt in rows:
         d = haversine((apt['latitude'], apt['longitude']), center)
         if d <= rkm:
             yield apt
