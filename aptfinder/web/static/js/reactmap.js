@@ -18,9 +18,7 @@ class ParentMan extends React.Component {
 
     constructor(props) {
         super(props);
-        this.isLoading = false;
         this.state = {items: []};
-
     }
 
     componentDidMount() {
@@ -66,20 +64,6 @@ class ParentMan extends React.Component {
         circleCenterTimer = setTimeout((t) => props.parent.loadData(c), 80);
     }
 
-    // shouldComponentUpdate(nextProps, nextState){
-    //     if(this.isLoading) {
-    //         return false;
-    //     };
-    //     return true;
-
-    // }
-
-    setChunkedState(items) {
-        console.log('jsonpipe got: ', items);
-
-        this.setState((state) => ({ items: state.items.concat([items]) }));
-    }
-
     loadData(circle) {
         var bounds = circle.getBounds().toJSON();
         Object.assign(bounds, {'radius': circle.getRadius(),
@@ -87,25 +71,6 @@ class ParentMan extends React.Component {
                                'center_lng': circle.getCenter().lng(),
                                'coordtype': 'degrees'});
         var data = EncodeQueryData(bounds);
-
-        // TODO: use jsonpipe
-        // TODO: for each json, create marker here
-        // TODO: for each json, set marker attribute
-
-        // Clear items before starting
-        // this.setState({items: []});
-        // this.isLoading = true;
-        // jsonpipe.flow('/get_apts'+'?'+data,
-        //               {'delimeter': '\n\n',
-        //                // bind(this) used so we have a reference to this
-        //                'success': this.setChunkedState.bind(this),
-        //                'complete': function(status) {
-        //                    this.setState(this.state);
-        //                    console.log('JSONPIPE complete');
-        //                }.bind(this)
-        //               }
-        //              );
-
 
         fetch('/get_apts'+'?'+data, {
             method: 'GET',
@@ -159,8 +124,8 @@ class GMap extends React.Component {
         this.markers = [];
         for (var i = 0; i < nextProps.items.length; i++) {
             var p = new google.maps.LatLng(
-                nextProps.items[i]['latitude'],
-                nextProps.items[i]['longitude']);
+                nextProps.items[i]['lat_deg'],
+                nextProps.items[i]['lng_deg']);
 
             this.markers.push(this.createMarker(p));
         };
@@ -245,9 +210,6 @@ class Listings extends React.Component {
     }
 
 };
-
-
-var initialCenter = { lng: -90.1056957, lat: 29.9717272 };
 
 
 ReactDOM.render(<ParentMan><GMap key='gmap'/><Listings key='listings' /></ParentMan>, document.getElementById('parent-container'));

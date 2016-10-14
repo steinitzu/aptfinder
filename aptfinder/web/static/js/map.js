@@ -7,8 +7,8 @@ class Listing {
         this.data = data;
         var p = new google.maps.LatLng(
             // TODO: Should request coords in degrees
-            data['latitude'],
-            data['longitude']);
+            data['lat_deg'],
+            data['lng_deg']);
         this.marker = new google.maps.Marker({
             position: p,
             title: data['title']});
@@ -88,7 +88,7 @@ class ListingsMgr {
         var reverse = this.sort_order;
         this.sort_order = !this.sort_order;
         console.log(this.listings);
-        sort_by_key(this.listings, key, reverse);
+        sortByKey(this.listings, key, reverse);
         console.log(this.listings);
         this.refresh();
     };
@@ -126,14 +126,14 @@ function initMap() {
         zoom: 12
     });
     var filter_circle = new google.maps.Circle({
-        strokeColor: '#FF0000',
+        strokeColor: '#4dff4d',
         strokeOpacity: 0.8,
         strokeWeight: 2,
-        fillColor: '#FF0000',
-        fillOpacity: 0.35,
-        map: map,
-        center: map.getCenter(),
-        radius: 1000,
+        fillColor: '#4dff4d',
+        strokeOpacity: 0.1,
+        map: this.map,
+        center: this.map.getCenter(),
+        radius: 5000,
         editable: true,
         draggable: true
     });

@@ -1,6 +1,6 @@
 function sortByKey(array, key, reverse) {
     return array.sort(function(a, b) {
-        var x = a[key]; var y = b[key];
+        var x = a.data[key]; var y = b.data[key];
         if (reverse) {
             return ((x > y) ? -1 : ((x < y) ? 1 : 0));
         } else {
