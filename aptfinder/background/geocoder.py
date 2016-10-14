@@ -26,10 +26,12 @@ def set_geocode(row, latdg, lngdg, source):
         UPDATE apartment
         SET latitude = %s,
         longitude  = %s,
+        lat_deg = %s,
+        lng_deg = %s,
         geocode_source = %s
         WHERE id = %s;
         '''
-    params = (radians(latdg), radians(lngdg), source, row['id'])
+    params = (radians(latdg), radians(lngdg), latdg, lngdg, source, row['id'])
     db.engine.execute(q, params)
 
 

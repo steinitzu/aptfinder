@@ -1,7 +1,7 @@
 from math import radians
 from math import degrees as to_degrees
 
-from flask import render_template, request, json, Response
+from flask import render_template, request, json, Response, jsonify
 
 from . import app
 from ..locator import to_radians, apartments_in_radius
@@ -10,7 +10,7 @@ from .. import db
 
 @app.route('/')
 def index():
-    return render_template('reactmap.html',
+    return render_template('mapview.html',
                            gmaps_key=app.config['GOOGLE_MAPS_API_KEY'])
 
 
@@ -27,11 +27,7 @@ def apartments_in_circle():
     def aptgen():
         for apt in apartments_in_radius(center, radius, bounds):
             apt = dict(apt)
-            if degrees:
-                apt['latitude'] = to_degrees(apt['latitude'])
-                apt['longitude'] = to_degrees(apt['longitude'])
-                yield apt
-
+            yield apt
     return Response(generate(aptgen()), content_type='application/json')
 
 
