@@ -6,7 +6,6 @@ class Listing {
         // Accepts json data
         this.data = data;
         var p = new google.maps.LatLng(
-            // TODO: Should request coords in degrees
             data['lat_deg'],
             data['lng_deg']);
         this.marker = new google.maps.Marker({
@@ -14,6 +13,15 @@ class Listing {
             title: data['title']});
         // Can be added through Stamp.appendChildren
         this.el = this.new_el();
+        // function highlight(el) {
+        //     console.log(el);
+        // }
+    }
+
+    toggle_highlight() {
+        var el = document.getElementById('listing-'+listing.data.id);
+        el.className += ' highlighted';
+        console.log('click');
     }
 
     new_el() {
@@ -55,11 +63,17 @@ class ListingsMgr {
         });
     }
 
+
+
+    add_to_list_view(listing) {
+        Stamp.appendChildren(document.getElementById('listings'),
+                             listing.new_el());
+        //TODO: don't work
+        listing.marker.addListener('mouseup', listing.highlight.bind(listing));
+    }
+
     fill_list_view() {
-        this.listings.forEach(function(listing){
-            Stamp.appendChildren(document.getElementById('listings'),
-                                 listing.new_el());
-        });
+        this.listings.forEach( this.add_to_list_view );
     }
 
     replace_listings(...listings) {
@@ -79,8 +93,7 @@ class ListingsMgr {
     add(listing) {
         this.listings.push(listing);
         listing.marker.setMap(map);
-        Stamp.appendChildren(document.getElementById('listings'),
-                             listing.el);
+        this.add_to_list_view(listing);
     }
 
     sort(key) {

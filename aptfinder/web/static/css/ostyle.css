@@ -30,3 +30,7 @@ html {
     margin-left:1em;
     display:block;
 }
+
+.highlighted {
+    background-color: yellow;
+}
