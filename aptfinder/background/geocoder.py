@@ -76,3 +76,7 @@ def tasked_geocode(num=2000):
     Geocode num apartments from db.
     """
     gmap_geocode_rows(get_rows(num))
+
+
+if __name__ == '__main__':
+    tasked_geocode(2400)
