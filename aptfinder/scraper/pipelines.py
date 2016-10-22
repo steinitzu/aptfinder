@@ -21,14 +21,27 @@ class AptscraperPipeline(object):
 class SQLAlchemyPipeline(object):
     def open_spider(self, spider):
         db.init_db()
+        # Timestamp of first row added this session
+        # Will delete any that are older
+        self.first_date = None
 
     def process_item(self, item, spider):
         s = db.Session()
         apt = db.get_if_exists(s, Apartment, url=item['url'])
         if apt:
-            log.info('Apartment url: "{}" already exists'.format(
-                apt.url))
-            return  # already exists, done
-        apt = Apartment(**item)
+            for key, value in item.items():
+                setattr(apt, key, value)
+        else:
+            apt = Apartment(**item)
         s.add(apt)
         s.commit()
+        if not self.first_date:
+            self.first_date = apt.touched_at
+
+    def close_spider(self, spider):
+        # DELETE inactive listings
+        # TODO: handle in case of multiple spiders
+        rs = db.engine.execute(
+            'DELETE FROM apartment WHERE touched_at < %s',
+            self.first_date)
+        rs.commit()
