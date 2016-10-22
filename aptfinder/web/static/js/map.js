@@ -16,10 +16,11 @@ class Listing {
         // function highlight(el) {
         //     console.log(el);
         // }
+        this.marker.addListener('mouseup', this.toggle_highlight.bind(this));
     }
 
     toggle_highlight() {
-        var el = document.getElementById('listing-'+listing.data.id);
+        var el = document.getElementById('listing-'+this.data.id);
         el.className += ' highlighted';
         console.log('click');
     }
@@ -69,7 +70,7 @@ class ListingsMgr {
         Stamp.appendChildren(document.getElementById('listings'),
                              listing.new_el());
         //TODO: don't work
-        listing.marker.addListener('mouseup', listing.highlight.bind(listing));
+
     }
 
     fill_list_view() {
