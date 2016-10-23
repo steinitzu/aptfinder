@@ -16,13 +16,23 @@ class Listing {
         // function highlight(el) {
         //     console.log(el);
         // }
-        this.marker.addListener('mouseup', this.toggle_highlight.bind(this));
+        this.marker.addListener('mouseup', this.toggle_pin.bind(this));
+
+
+        this.pinned = false;
     }
 
-    toggle_highlight() {
-        var el = document.getElementById('listing-'+this.data.id);
-        el.className += ' highlighted';
-        console.log('click');
+    toggle_pin() {
+        let el = document.getElementById('listing-'+this.data.id);
+        let cls = el.className;
+        if (cls === 'pinned') {
+            el.className = '';
+            this.pinned = false;
+        } else {
+            el.className = 'pinned';
+            this.pinned = true;
+        }
+        el.scrollIntoView();
     }
 
     new_el() {
@@ -34,11 +44,15 @@ class Listing {
 class ListingsMgr {
     constructor(...listings) {
         this.listings = listings;
+        this.pinned = [];
         this.sort_order = false;
     }
 
     clear_markers() {
         this.listings.forEach(function(listing){
+            if (listing.pinned) {
+                return;
+            };
             // Remove from map
             listing.marker.setMap(null);
         });
@@ -46,16 +60,32 @@ class ListingsMgr {
 
     clear_list_view() {
         var listings_el = document.getElementById("listings");
-        while (listings_el.firstChild) {
-            listings_el.removeChild(listings_el.firstChild);
-        };
+        let children = Array.from(listings_el.children);
+        children.forEach(function(child) {
+            if (child.className === 'pinned') {
+                return;
+            };
+            listings_el.removeChild(child);
+
+        });
     }
 
-    // Clear all listings from map, sidebar and array
+    clear_data() {
+        let new_list = [];
+        this.listings.forEach(function(listing) {
+            if(listing.pinned) {
+                new_list.push(listing);
+            };
+        });
+        this.listings = new_list;
+
+    }
+
+    // Clear all unpinned listings from map, sidebar and array
     clear_all() {
         this.clear_markers();
         this.clear_list_view();
-        this.listings = [];
+        this.clear_data();
     }
 
     fill_markers() {
@@ -65,11 +95,12 @@ class ListingsMgr {
     }
 
 
-
     add_to_list_view(listing) {
         Stamp.appendChildren(document.getElementById('listings'),
                              listing.new_el());
-        //TODO: don't work
+        let el = document.getElementById('listing-'+listing.data['id']);
+        el.addEventListener('mouseup', listing.toggle_pin.bind(listing));
+
 
     }
 
@@ -79,7 +110,7 @@ class ListingsMgr {
 
     replace_listings(...listings) {
         this.clear_all();
-        this.listings = listings;
+        this.listings.push.apply(this.listings, listings);
         this.fill_markers();
         this.fill_list_view();
     }

@@ -31,6 +31,6 @@ html {
     display:block;
 }
 
-.highlighted {
-    background-color: yellow;
+.pinned {
+    background-color: #4dff4d;
 }
