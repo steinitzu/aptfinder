@@ -23,12 +23,12 @@ class ApartmentsSpider(scrapy.Spider):
         'http://www.kijiji.ca/b-4-plus-bedroom-apartments-condos/gta-greater-toronto-area/c216l1700272?ad=offering']
 
     bed_map = {
-        '2-bedroom-apartments-condos': '2 bedroom',
-        '1-bedroom-apartments-condos': '1 bedroom',
-        '3-bedroom-apartments-condos': '3 bedroom',
-        '4-plus-bedroom-apartments-condos': '4 bedroom',
-        'bachelor-studio-apartments-condos': 'studio',
-        '1-bedroom-den-apartments-condos': '1 bedroom'
+        '2-bedroom-apartments-condos': 2,
+        '1-bedroom-apartments-condos': 1,
+        '3-bedroom-apartments-condos': 3,
+        '4-plus-bedroom-apartments-condos': 4,
+        'bachelor-studio-apartments-condos': 1,
+        '1-bedroom-den-apartments-condos': 1
     }
 
     def parse(self, response):

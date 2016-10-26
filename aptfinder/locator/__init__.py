@@ -10,7 +10,7 @@ def to_radians(lat, lng):
     return radians(lat), radians(lng)
 
 
-def apartments_in_radius(center, radius_meters, bounds):
+def apartments_in_radius(center, radius_meters, bounds, **kwargs):
     """
     Get all Apartments falling inside
     circle with given center and radius.
@@ -25,13 +25,16 @@ def apartments_in_radius(center, radius_meters, bounds):
         '''
         SELECT * FROM apartment WHERE
         price is not %s AND
+        bedrooms >= %s AND
         (latitude <= %s AND
         latitude >= %s AND
         longitude <= %s AND
         longitude >= %s) AND
         acos(sin(%s) * sin(latitude) + cos(%s) * cos(latitude) * cos(longitude - (%s))) <= %s;
         ''',
-        (None, bn, bs, be, bw,
+        (None,
+         kwargs['bedrooms'],
+         bn, bs, be, bw,
          center[0], center[0], center[1], rrad))
     for apt in res:
         yield apt

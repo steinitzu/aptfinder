@@ -16,16 +16,27 @@ def index():
 
 @app.route('/get_apts', methods=['GET'])
 def apartments_in_circle():
+    """
+    float center_lat (radians)
+    float center_lng (radians)
+    float radius (meters)
+    float bounds north, south, east, west bounds (degrees)
+
+    filters:
+    int bedrooms (min number of bedrooms)
+    """
     center = to_radians(
         float(request.args.get('center_lat')),
         float(request.args.get('center_lng')))
     radius = float(request.args.get('radius'))
     bounds = {key: radians(float(request.args[key]))
               for key in ('north', 'south', 'east', 'west')}
-    degrees = request.args.get('coordtype', 'radians') == 'degrees'
+
+    kw = {}
+    kw['bedrooms'] = int(request.args.get('bedrooms', 1))
 
     def aptgen():
-        for apt in apartments_in_radius(center, radius, bounds):
+        for apt in apartments_in_radius(center, radius, bounds, **kw):
             apt = dict(apt)
             yield apt
     return Response(generate(aptgen()), content_type='application/json')
