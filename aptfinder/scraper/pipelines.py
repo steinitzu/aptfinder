@@ -4,6 +4,7 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
+import datetime
 
 import googlemaps
 
@@ -28,9 +29,8 @@ class SQLAlchemyPipeline(object):
     def process_item(self, item, spider):
         s = db.Session()
         apt = db.get_if_exists(s, Apartment, url=item['url'])
-        if apt:
-            for key, value in item.items():
-                setattr(apt, key, value)
+        if apt: # exists
+            apt.touched_at = datetime.datetime.utcnow()
         else:
             apt = Apartment(**item)
         s.add(apt)

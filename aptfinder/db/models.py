@@ -18,10 +18,13 @@ class Apartment(BaseModel):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     created_at = Column(DateTime,
-                        server_default=func.current_timestamp())
+                        server_default=func.timezone(
+                            'UTC', func.current_timestamp()))
     touched_at = Column(DateTime,
-                        server_default=func.current_timestamp(),
-                        onupdate=func.current_timestamp())
+                        server_default=func.timezone(
+                            'UTC', func.current_timestamp()),
+                        onupdate=func.timezone(
+                            'UTC', func.current_timestamp()))
     date_listed = Column(DateTime)
     url = Column(String, unique=True, nullable=False)
     title = Column(String)
