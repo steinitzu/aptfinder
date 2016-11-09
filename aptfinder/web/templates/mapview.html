@@ -22,19 +22,14 @@
     <div class="container u-full-width u-max-full-width u-full-height">
         <div class="row">
             <div class="eight columns">
-                <div class="form">
-                    <label>Search
-                        <input type="search" placeholder="2 bedroom" id="search_input">
-                    </label>
-
-                </div>
+                <label>Minimum bedrooms:
+                    <input id="filter_bedrooms" type="number" min="1" max="4" step="1" value="1">
+                </label>
             </div>
             <div class="four columns">
-                <div class="form">
                     <label>Sort by
                         <button onclick="listingsmgr.sort('price')">Price</button>
                     </label>
-                </div>
             </div>
         </div>
         <div class="row">

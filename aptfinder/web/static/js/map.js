@@ -1,5 +1,7 @@
 var map;
 var center_timer;
+var filter_circle;
+var listingsmgr;
 
 class Listing {
     constructor(data) {
@@ -46,6 +48,28 @@ class ListingsMgr {
         this.listings = listings;
         this.pinned = [];
         this.sort_order = false;
+        var filter_bedrooms = document.getElementById('filter_bedrooms');
+
+        let do_filter = function() {
+            this.filter(
+                {'bedrooms': filter_bedrooms.value},
+                filter_circle);
+        }.bind(this);
+
+        filter_bedrooms.addEventListener('change', do_filter);
+
+        filter_circle.addListener('radius_changed', do_filter);
+        filter_circle.addListener('center_changed', function() {
+            // Set a timer to prevent fetching while user is dragging
+            clearTimeout(center_timer);
+            center_timer = setTimeout(do_filter, 100);
+        });
+    }
+
+    filter(filter, circle) {
+        update_listings(filter, circle);
+        console.log(filter);
+        console.log(circle);
     }
 
     clear_markers() {
@@ -140,16 +164,14 @@ class ListingsMgr {
 }
 
 
-var listingsmgr = new ListingsMgr();
-
-
-function update_listings(circle) {
+function update_listings(filter, circle) {
 
     var bounds = circle.getBounds().toJSON();
     Object.assign(bounds, {'radius': circle.getRadius(),
                            'center_lat': circle.getCenter().lat(),
                            'center_lng': circle.getCenter().lng(),
                            'coordtype': 'degrees'});
+    Object.assign(bounds, filter);
     var data = EncodeQueryData(bounds);
 
     fetch('/get_apts?'+data, {
@@ -170,7 +192,7 @@ function initMap() {
         center: {lat: 43.660064, lng: -79.568268},
         zoom: 12
     });
-    var filter_circle = new google.maps.Circle({
+    filter_circle = new google.maps.Circle({
         strokeColor: '#4dff4d',
         strokeOpacity: 0.8,
         strokeWeight: 2,
@@ -182,14 +204,5 @@ function initMap() {
         editable: true,
         draggable: true
     });
-
-    google.maps.event.addListener(filter_circle, 'radius_changed', function() {
-        update_listings(filter_circle);
-    });
-    google.maps.event.addListener(filter_circle, 'center_changed', function() {
-        // Set a timer to prevent fetching while user is dragging
-        clearTimeout(center_timer);
-        center_timer = setTimeout(function() { update_listings(filter_circle); },
-                                  100);
-    });
+    listingsmgr = new ListingsMgr();
 }
