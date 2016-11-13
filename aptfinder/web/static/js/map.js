@@ -1,191 +1,208 @@
-var map;
-var center_timer;
-var filter_circle;
-var listingsmgr;
-
 class Listing {
     constructor(data) {
-        // Accepts json data
-        this.data = data;
-        var p = new google.maps.LatLng(
-            data['lat_deg'],
-            data['lng_deg']);
-        this.marker = new google.maps.Marker({
-            position: p,
-            title: data['title']});
-        // Can be added through Stamp.appendChildren
-        this.el = this.new_el();
-        // function highlight(el) {
-        //     console.log(el);
-        // }
-        this.marker.addListener('mouseup', this.toggle_pin.bind(this));
-
-
-        this.pinned = false;
-    }
-
-    toggle_pin() {
-        let el = document.getElementById('listing-'+this.data.id);
-        let cls = el.className;
-        if (cls === 'pinned') {
-            el.className = '';
-            this.pinned = false;
-        } else {
-            el.className = 'pinned';
-            this.pinned = true;
-        }
-        el.scrollIntoView();
-    }
-
-    new_el() {
-        this.el = Stamp.expand(ctx.import('ltempl'), this.data);
-        return this.el;
+        Object.assign(this, data);
     }
 }
 
-class ListingsMgr {
-    constructor(...listings) {
-        this.listings = listings;
-        this.pinned = [];
-        this.sort_order = false;
-        var filter_bedrooms = document.getElementById('filter_bedrooms');
 
-        let do_filter = function() {
-            this.filter(
-                {'bedrooms': filter_bedrooms.value},
-                filter_circle);
-        }.bind(this);
+class ListingCollection {
 
-        filter_bedrooms.addEventListener('change', do_filter);
-
-        filter_circle.addListener('radius_changed', do_filter);
-        filter_circle.addListener('center_changed', function() {
-            // Set a timer to prevent fetching while user is dragging
-            clearTimeout(center_timer);
-            center_timer = setTimeout(do_filter, 100);
-        });
-    }
-
-    filter(filter, circle) {
-        update_listings(filter, circle);
-        console.log(filter);
-        console.log(circle);
-    }
-
-    clear_markers() {
-        this.listings.forEach(function(listing){
-            if (listing.pinned) {
-                return;
-            };
-            // Remove from map
-            listing.marker.setMap(null);
-        });
-    }
-
-    clear_list_view() {
-        var listings_el = document.getElementById("listings");
-        let children = Array.from(listings_el.children);
-        children.forEach(function(child) {
-            if (child.className === 'pinned') {
-                return;
-            };
-            listings_el.removeChild(child);
-
-        });
-    }
-
-    clear_data() {
-        let new_list = [];
-        this.listings.forEach(function(listing) {
-            if(listing.pinned) {
-                new_list.push(listing);
-            };
-        });
-        this.listings = new_list;
-
-    }
-
-    // Clear all unpinned listings from map, sidebar and array
-    clear_all() {
-        this.clear_markers();
-        this.clear_list_view();
-        this.clear_data();
-    }
-
-    fill_markers() {
-        this.listings.forEach(function(listing){
-            listing.marker.setMap(map);
-        });
-    }
-
-
-    add_to_list_view(listing) {
-        Stamp.appendChildren(document.getElementById('listings'),
-                             listing.new_el());
-        let el = document.getElementById('listing-'+listing.data['id']);
-        el.addEventListener('mouseup', listing.toggle_pin.bind(listing));
-
-
-    }
-
-    fill_list_view() {
-        this.listings.forEach( this.add_to_list_view );
-    }
-
-    replace_listings(...listings) {
-        this.clear_all();
-        this.listings.push.apply(this.listings, listings);
-        this.fill_markers();
-        this.fill_list_view();
-    }
-
-    refresh() {
-        this.clear_list_view();
-        this.clear_markers();
-        this.fill_markers();
-        this.fill_list_view();
+    constructor(){
+        this.listings = {};
+        this.events = {};
     }
 
     add(listing) {
-        this.listings.push(listing);
-        listing.marker.setMap(map);
-        this.add_to_list_view(listing);
+        // Add new listing
+        this.listings[listing['id']] = listing;
+        this.notify('added', listing);
     }
 
-    sort(key) {
-        // should prepend data to key before sort (listing.data)
-        var reverse = this.sort_order;
-        this.sort_order = !this.sort_order;
-        console.log(this.listings);
-        sortByKey(this.listings, key, reverse);
-        console.log(this.listings);
-        this.refresh();
-    };
+    remove(listing) {
+        // remove given listing
+        let x = this.listings[listing['id']];
+        delete this.listings[listing['id']];
+        this.notify('removed', x);
+
+    }
+
+    clear() {
+        for (var key in this.listings) {
+            this.remove(this.listings[key]);
+        }
+        this.notify('cleared', null);
+    }
+
+    fill(data) {
+        data.forEach(function(d) {
+            let l = new Listing(d);
+            this.add(l);
+        }.bind(this));
+        this.notify('reloaded', this.listings);
+    }
+
+
+    subscribe(event, callback) {
+        if (!(event in this.events)) {
+            this.events[event] = [];
+        };
+        this.events[event].push(callback);
+    }
+
+    notify(event, data) {
+        let events = this.events[event];
+        for (var e in events) {
+            events[e](event, data);
+        };
+
+    }
+}
+
+class Filter {
+    constructor(collection, circle, bedrooms) {
+        this.collection = collection;
+
+        let doFilter = function() {
+            this.get(
+                {'bedrooms': bedrooms.value},
+                circle);
+        }.bind(this);
+
+        var centerTimer;
+
+        bedrooms.addEventListener('change', doFilter);
+
+        circle.addListener('radius_changed', doFilter);
+        circle.addListener('center_changed', function() {
+            // Set a timer to prevent fetching while user is dragging
+            clearTimeout(centerTimer);
+            centerTimer = setTimeout(doFilter, 100);
+        });
+    }
+
+    get(filter, circle) {
+        let bounds = circle.getBounds().toJSON();
+        Object.assign(bounds, {'radius': circle.getRadius(),
+                               'center_lat': circle.getCenter().lat(),
+                               'center_lng': circle.getCenter().lng(),
+                               'coordtype': 'degrees'});
+        Object.assign(bounds, filter);
+        let data = EncodeQueryData(bounds);
+        fetch('/get_apts?'+data, {
+            method: 'GET',
+            credentials: 'same-origin'
+        }).then(function(response) {
+            response.json().then(function(result) {
+                this.collection.clear();
+                this.collection.fill(result);
+            }.bind(this));
+        }.bind(this));
+    }
 }
 
 
-function update_listings(filter, circle) {
+class ListView {
+    constructor(collection) {
+        this.collection = collection;
+        this.collection.subscribe('added', this.onAdded.bind(this));
+        this.collection.subscribe('removed', this.onRemoved.bind(this));
+        this.collection.subscribe('reloaded', this.onReloaded.bind(this));
+        // Store the last sort key and order
+        this.sortInfo = {'key': 'price', 'reverse': false};
+    }
 
-    var bounds = circle.getBounds().toJSON();
-    Object.assign(bounds, {'radius': circle.getRadius(),
-                           'center_lat': circle.getCenter().lat(),
-                           'center_lng': circle.getCenter().lng(),
-                           'coordtype': 'degrees'});
-    Object.assign(bounds, filter);
-    var data = EncodeQueryData(bounds);
+    onAdded(event, listing) {
+        this.add(listing);
+    }
 
-    fetch('/get_apts?'+data, {
-        method: 'GET',
-        credentials: 'same-origin'
-    }).then(function(response) {
-        response.json().then(function(result) {
-            listingsmgr.clear_all();
-            result.forEach(function(data){
-                listingsmgr.add(new Listing(data));
-            });
+    onRemoved(event, listing) {
+        let listingsel = document.getElementById('listings'); // TODO: make obj attr
+        let child = document.getElementById('listing-'+listing['id']);
+        listingsel.removeChild(child);
+    }
+
+    onReloaded(event, listings) {
+        // Called after collection is reloaded (all listings replaced)
+        // Make sure previous sort order persists after update
+        this.sortInfo.reverse = !this.sortInfo.reverse;
+        this.sort(this.sortInfo.key);
+    }
+
+    add(listing) {
+        let el = Stamp.expand(ctx.import('ltempl'), listing);
+        Stamp.appendChildren(document.getElementById('listings'), el);
+    }
+
+    clear() {
+        let listingsEl = document.getElementById('listings');
+        let children = Array.from(listingsEl.children);
+        children.forEach(function(child) {
+            listingsEl.removeChild(child);
         });
-    });
-};
+    }
+
+    fill(listings) {
+        // Fill with a list of listings
+        listings.forEach(function(listing) {
+            this.add(listing);
+        }.bind(this));
+    }
+
+    sort(key) {
+        let sorted = [];
+        for (var k in this.collection.listings) {
+            sorted[sorted.length] = this.collection.listings[k];
+        };
+        if (this.sortInfo.key === key) {
+            this.sortInfo.reverse = !this.sortInfo.reverse;
+        } else {
+            this.sortInfo.key = key;
+            this.sortInfo.reverse = false;
+        };
+        sortByKey(sorted, this.sortInfo.key, this.sortInfo.reverse);
+        this.clear();
+        this.fill(sorted);
+    }
+}
+
+
+class MapView {
+    constructor(collection, map) {
+        this.map = map;
+        this.markers = {};
+        this.collection = collection;
+        this.collection.subscribe('added', this.onAdded.bind(this));
+        this.collection.subscribe('removed', this.onRemoved.bind(this));
+    }
+
+    onAdded(event, listing) {
+        if (listing['id'] in this.markers) {
+            this.markers[listing['id']].setMap(null);
+        };
+        let p = new google.maps.LatLng(listing['lat_deg'], listing['lng_deg']);
+        let marker = new google.maps.Marker({
+            position: p,
+            title: this['title']});
+        marker.setMap(this.map);
+        this.markers[listing['id']] = marker;
+    }
+
+    onRemoved(event, listing) {
+        let marker = this.markers[listing['id']];
+        if (marker) {
+            marker.setMap(null);
+        }
+        delete this.markers[listing['id']];
+    }
+}
+
+
+var lcol = new ListingCollection();
+var listview = new ListView(lcol);
+var map;
+var mapview;
+var filter;
+
 
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
@@ -200,9 +217,10 @@ function initMap() {
         strokeOpacity: 0.1,
         map: this.map,
         center: this.map.getCenter(),
-        radius: 5000,
+        radius: 3000,
         editable: true,
         draggable: true
     });
-    listingsmgr = new ListingsMgr();
-}
+    mapview = new MapView(lcol, map);
+    filter = new Filter(lcol, filter_circle, document.getElementById('filter_bedrooms'));
+ }
