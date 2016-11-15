@@ -44,4 +44,4 @@ class SQLAlchemyPipeline(object):
         rs = db.engine.execute(
             'DELETE FROM apartment WHERE touched_at < %s',
             self.first_date)
-        rs.commit()
+        rs.close()
